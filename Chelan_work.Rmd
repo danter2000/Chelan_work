@@ -251,17 +251,44 @@ plot_chelan_loess_group(chelan_df_long, "timestamp_utc", "total_current")
 
 ```{r Q9}
 
+library(tidyverse)
 
 ui <- dashboardPage(
   dashboardHeader(title = "Unit Diagnostics"),
   dashboardSidebar(
     sliderInput("slider", "Slider input:", 1, 100, 50)
+  ,
+    selectInput("Unit", 
+              label = "Unit", 
+              choices = c("", 
+                          "Unit C2", 
+                          "Unit C4",
+                          "Unit C5",
+                          "Unit C6",
+                          "Unit C7"),
+              selected = NULL,
+              width = "100%"),
+  selectInput("Variable", 
+              label = "Measurement", 
+              choices = c("", 
+                          "Avg Winding Temp", 
+                          "Total Current",
+                          "Avg Cooling Water Flow",
+                          "Avg Cooling Water Temp",
+                          "Avg Cooling Air Out Temp"),
+              selected = NULL,
+              width = "100%"),
+  dateRangeInput("dates", 
+                 "Date Range",
+                 start = "2018-01-01", 
+                 end = "2018-12-31")
   ),
   dashboardBody(
     # Boxes need to be put in a row (or column)
     fluidRow(
-      box(plotOutput("plot1", height = 250)
-      ),
+      box(plotOutput("plot1", height = 400, width = 500)
+      )),
+      fluidRow(
       box(tableOutput("table1")
       )
     )
@@ -273,8 +300,7 @@ server <- function(input, output) {
   histdata <- rnorm(500)
 
   output$plot1 <- renderPlot({
-    data <- histdata[seq_len(input$slider)]
-    hist(data)
+    plot_chelan_loess(chelan_df_long, "timestamp_utc", input$Variable)
   })
   
   output$table1 <- renderTable({
