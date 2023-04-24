@@ -72,9 +72,10 @@ chelan_df_long %>% group_by(unit_num) %>%
 
 ```{r Q6}
 
-chelan_df_long %>% filter(unit_status = "Off") %>%
-  group_by(hour = lubridate::floor_date(timestamp_utc, '1 hour')) %>%
-  summarise(offline_hours_totals = sum(unit_status == "Off")) %>%
+chelan_df_long %>% filter(unit_status == "Off") %>%
+  group_by(hour = hour(timestamp_utc)) %>%
+  summarise(offline_hours_totals = length(unit_status)) 
+
 ```
 
 ```{r Q7}
