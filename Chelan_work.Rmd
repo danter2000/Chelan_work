@@ -1,0 +1,20 @@
+---
+title: "Chelan_PUD_Work"
+author: "Dante Ramirez"
+date: '2023-04-24'
+output: html_document
+---
+
+```{r setup, include=FALSE}
+
+# General Data Tidying
+library(tidyverse)
+library(janitor)
+library(data.table)
+
+# For Animations
+
+# For Dashboard
+
+```
+
