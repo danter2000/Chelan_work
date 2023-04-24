@@ -251,17 +251,18 @@ plot_chelan_loess_group(chelan_df_long, "timestamp_utc", "total_current")
 
 ```{r Q9}
 
+
 ui <- dashboardPage(
-  dashboardHeader(title = "Basic dashboard"),
-  dashboardSidebar(),
+  dashboardHeader(title = "Unit Diagnostics"),
+  dashboardSidebar(
+    sliderInput("slider", "Slider input:", 1, 100, 50)
+  ),
   dashboardBody(
     # Boxes need to be put in a row (or column)
     fluidRow(
-      box(plotOutput("plot1", height = 250)),
-
-      box(
-        title = "Controls",
-        sliderInput("slider", "Number of observations:", 1, 100, 50)
+      box(plotOutput("plot1", height = 250)
+      ),
+      box(tableOutput("table1")
       )
     )
   )
@@ -274,6 +275,11 @@ server <- function(input, output) {
   output$plot1 <- renderPlot({
     data <- histdata[seq_len(input$slider)]
     hist(data)
+  })
+  
+  output$table1 <- renderTable({
+    data <- histdata[seq_len(input$slider)]
+    tibble(data)
   })
 }
 
