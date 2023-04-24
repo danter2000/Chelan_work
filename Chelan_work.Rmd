@@ -53,15 +53,13 @@ chelan_df_long %>% filter(unit_num == "Unit C6",
 
 ```
 
-```{r Q3}
+```{r Q3 and Q4}
 
-
-
-```
-
-```{r Q4}
-
-
+chelan_df_long %>% filter(unit_num == "Unit C6") %>% 
+  group_by(month = lubridate::floor_date(timestamp_utc, 'month')) %>%
+  summarise(monthly_offline_hrs = sum(unit_status == "Off"),
+            monthly_offline_prop = round(sum(unit_status == "Off") / length(unit_status),
+                                         3))
 
 ```
 
