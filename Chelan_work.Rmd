@@ -5,7 +5,7 @@ date: '2023-04-24'
 output: html_document
 ---
 
-```{r setup, include=FALSE}
+```{r setup, warning = F, message = F}
 
 # General Data Tidying
 library(tidyverse)
@@ -13,8 +13,69 @@ library(janitor)
 library(data.table)
 
 # For Animations
+library(ggiraph)
+library(gganimate)
 
 # For Dashboard
+library(shinydashboard)
+
+chelan_df <- read_csv(file= "PreAssignmentDataSet_StatorTemp.csv")
 
 ```
 
+```{r Q1}
+
+chelan_df_long <- chelan_df %>% 
+  clean_names() %>% 
+  pivot_longer(cols = -c(1:2),
+               names_to = c(".value", "num"))
+
+```
+
+```{r Q2}
+
+
+
+```
+
+```{r Q3}
+
+
+
+```
+
+```{r Q4}
+
+
+
+```
+
+```{r Q5}
+
+
+
+```
+
+```{r Q6}
+
+
+
+```
+
+```{r Q7}
+
+
+
+```
+
+```{r Q8}
+
+
+
+```
+
+```{r Q9}
+
+
+
+```
