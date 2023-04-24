@@ -114,7 +114,7 @@ ggplot(data, aes_string(x = time_var, y = y_var, color = y_var)) +
                             as.POSIXct("2018-06-21"),
                             as.POSIXct("2018-09-22"),
                             as.POSIXct("2018-12-21")),
-             colour = "grey85",
+             colour = "grey",
              alpha = 0.5) +
   annotate("text", x = c(as.POSIXct("2018-02-05"),
                          as.POSIXct("2018-05-05"),
@@ -122,7 +122,7 @@ ggplot(data, aes_string(x = time_var, y = y_var, color = y_var)) +
                          as.POSIXct("2018-11-05")),
            y = max(data[[y_var]]) * 1.05,
            label = c("Winter", "Spring", "Summer", "Autumn"),
-           colour = "grey70",
+           colour = "grey",
            size = 4) +
            theme(axis.title.x = element_blank()) +
            labs(y = y_axis_title) +
@@ -139,11 +139,48 @@ plot_chelan_loess <- function(data, time_var, y_var) {
 min_idx <- which.min(data[[y_var]])
 max_idx <- which.max(data[[y_var]])
 
-ggplot(data %>% filter(data[[y_var]] > 0), aes_string(x = time_var, y = y_var, color = y_var)) +
-  geom_smooth(aes(col = ..y..), size = 2) +
+if (y_var == "avg_winding_temp") {
+    y_axis_title <- "Average Stator Winding Temperature (°C)"
+    legend_title <- "(°C)"
+  } else if (y_var == "total_current") {
+    y_axis_title <- "Total Current (A)"
+    legend_title <- "(A)"
+  } else if (y_var == "avg_cooling_water_flow_gal") {
+    y_axis_title <- "Average Cooling Water Flow (gal/min)"
+    legend_title <- "(gal/min)"
+  } else if (y_var == "avg_cooling_water_temp") {
+    y_axis_title <- "Average Cooling Water Temperature (°C)"
+    legend_title <- "(°C)"
+  } else if (y_var == "avg_cooling_air_out_temp") {
+    y_axis_title <- "Average Cooling Air Out Temperature (°C)"
+    legend_title <- "(°C)"
+  }
+
+ggplot(data, aes_string(x = time_var, y = y_var, color = y_var)) +
+  geom_smooth(aes(col = ..y..)) +
   scale_color_gradient2(low = "blue", high = "red", mid = "yellow",
-                        midpoint = median(data[[y_var]])) +
-  theme_classic()
+                        midpoint = median(data[[y_var]]),
+                        name = legend_title) +
+  theme_classic() +
+  geom_vline(xintercept = c(as.POSIXct("2018-03-20"),
+                            as.POSIXct("2018-06-21"),
+                            as.POSIXct("2018-09-22"),
+                            as.POSIXct("2018-12-21")),
+             colour = "grey",
+             alpha = 0.5) +
+  annotate("text", x = c(as.POSIXct("2018-02-05"),
+                         as.POSIXct("2018-05-05"),
+                         as.POSIXct("2018-08-05"),
+                         as.POSIXct("2018-11-05")),
+           y = max(data[[y_var]]) * 1.05,
+           label = c("Winter", "Spring", "Summer", "Autumn"),
+           colour = "grey",
+           size = 4) +
+           theme(axis.title.x = element_blank()) +
+           labs(y = y_axis_title) +
+           scale_x_datetime(date_labels = "%b",
+                            breaks = scales::date_breaks("1 month"),
+                            labels = format(as.POSIXct(data[[time_var]]), "%b"))
   
 }
 
