@@ -85,19 +85,26 @@ plot_chelan_raw <- function(data, time_var, y_var) {
 min_idx <- which.min(data[[y_var]])
 max_idx <- which.max(data[[y_var]])
 
-ggplot(data %>% filter(data[[y_var]] > 0), aes_string(x = time_var, y = y_var, color = y_var)) +
+ggplot(data, aes_string(x = time_var, y = y_var, color = y_var)) +
   geom_point(aes(col = ..y..)) +
   geom_smooth(aes(col = ..y..)) +
   scale_color_gradient2(low = "blue", high = "red", mid = "yellow",
                         midpoint = median(data[[y_var]])) +
   theme_classic() +
-  geom_vline(xintercept = c(2.9, 5.9, 8.9, 11.9),
+  geom_vline(xintercept = c(as.POSIXct("2018-03-20"),
+                            as.POSIXct("2018-06-21"),
+                            as.POSIXct("2018-09-22"),
+                            as.POSIXct("2018-12-21")),
              colour = "grey85",
              alpha = 0.5) +
-  annotate("text", x = c(1.5, 4.5, 7.5, 10.5), y = 97,
+  annotate("text", x = c(as.POSIXct("2018-02-05"),
+                            as.POSIXct("2018-05-05"),
+                            as.POSIXct("2018-08-05"),
+                            as.POSIXct("2018-11-05")),
+           y = max(data[[y_var]]) * 1.05,
            label = c("Winter", "Spring", "Summer", "Autumn"),
            colour = "grey70",
-           size = 4))
+           size = 4)
   
 }
 
