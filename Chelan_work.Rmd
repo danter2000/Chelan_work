@@ -83,7 +83,21 @@ chelan_df_long %>% filter(unit_status == "Off") %>%
 
 ```{r Q7}
 
-plot_chelan_raw <- function(data, time_var, y_var) {
+plot_chelan_raw <- function(data,
+                            time_var,
+                            y_var,
+                            subset_var = NULL,
+                            subset_level = NULL) {
+  
+plot_title <- ""
+  
+if (!is.null(subset_level)) {
+    plot_title <- paste0(plot_title, "", subset_level)
+  }
+
+if (!is.null(subset_var) && !is.null(subset_level)) {
+    data <- data %>% filter(!!as.name(subset_var) == subset_level)
+  }
 
 min_idx <- which.min(data[[y_var]])
 max_idx <- which.max(data[[y_var]])
@@ -127,14 +141,17 @@ ggplot(data, aes_string(x = time_var, y = y_var, color = y_var)) +
            colour = "grey",
            size = 4) +
            theme(axis.title.x = element_blank()) +
-           labs(y = y_axis_title) +
+           labs(y = y_axis_title, title = plot_title) +
            scale_x_datetime(date_labels = "%b",
                             breaks = scales::date_breaks("1 month"),
                             labels = format(as.POSIXct(data[[time_var]]), "%b"))
   
 }
 
-plot_chelan_raw(chelan_df_long, "timestamp_utc", "avg_cooling_water_temp")
+plot_chelan_raw(chelan_df_long,
+                "timestamp_utc",
+                "avg_cooling_water_temp",
+                "unit_num")
 
 plot_chelan_loess <- function(data, time_var, y_var) {
 
@@ -260,7 +277,7 @@ ui <- dashboardPage(
   ,
     selectInput("Unit", 
               label = "Unit", 
-              choices = c("", 
+              choices = c("All Units", 
                           "Unit C2", 
                           "Unit C4",
                           "Unit C5",
