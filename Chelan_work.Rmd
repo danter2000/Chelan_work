@@ -362,8 +362,8 @@ plot_chelan_loess_may(chelan_df_long,
                 "avg_cooling_water_temp",
                 "unit_num",
                 "Unit C7",
-                "2018-05-01",
-                "2018-05-30")
+                "2018-05-15",
+                "2018-05-16")
 
 ```
 
@@ -378,29 +378,22 @@ sum_table <- function(data,
                       end_date = NULL) {
 
   
-if (!is.null(start_date) & !is.null(end_date)) {
-    data <- data %>% filter(date >= start_date & date <= end_date)
-  }
-  
-  # Filter data based on unit levels if unit_levels are specified
-  if (!is.null(unit_levels)) {
-    data <- data %>% filter(unit %in% unit_levels)
+if (!is.null(subset_var) && !is.null(subset_level)) {
+    data <- data %>% filter(!!as.name(subset_var) == subset_level)
+}
+
+if (!is.null(start_date) && !is.null(end_date)) {
+    data <- data %>% 
+    filter(as.Date(data[[time_var]]) >= as.Date(start_date) & as.Date(data[[time_var]]) <= as.Date(end_date))
   }
   
   # Calculate summary statistics
-  summary_stats <- data %>%
-    group_by(unit, .data[[group_var]]) %>%
-    summarise(mean = mean(.data[[y_var]], na.rm = TRUE),
-              median = median(.data[[y_var]], na.rm = TRUE),
-              min = min(.data[[y_var]], na.rm = TRUE),
-              max = max(.data[[y_var]], na.rm = TRUE),
-              n = n()) %>%
-    ungroup() %>%
-    arrange(unit, .data[[group_var]])
-  
-  # Format summary statistics table using kable
-  kable(summary_stats, caption = "Summary Statistics", format = "html") %>%
-    kable_styling(bootstrap_options = "striped")
+  data %>%
+    select(!!sym(time_var), !!sym(y_var)) %>%
+    summarize(Sum= sum(!!sym(y_var)),
+              Min = round(min(!!sym(y_var)), 2),
+              Max = round(max(!!sym(y_var)), 2),
+              Median = round(median(!!sym(y_var)), 2))
       
 }
 
