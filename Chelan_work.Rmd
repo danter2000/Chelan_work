@@ -11,6 +11,7 @@ output: html_document
 library(tidyverse)
 library(janitor)
 library(data.table)
+library(scales)
 
 # For Animations
 library(ggiraph)
@@ -350,14 +351,18 @@ ggplot(data %>% filter(month(data[[time_var]]) == 5),
            theme(axis.title.x = element_blank()) +
            labs(y = y_axis_title, title = plot_title) +
            scale_x_datetime(date_labels = "%d",
-                            breaks = date_breaks("1 day"),
+                            breaks = date_breaks("2 days"),
                             labels = format(as.POSIXct(data[[time_var]]), "%d"))
   
 }
 
 plot_chelan_loess_may(chelan_df_long,
                 "timestamp_utc",
-                "avg_cooling_water_temp")
+                "avg_cooling_water_temp",
+                "unit_num",
+                "Unit C7",
+                "2018-05-02",
+                "2018-05-14")
 
 ```
 
