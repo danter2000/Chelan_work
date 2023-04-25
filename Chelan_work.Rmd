@@ -343,7 +343,10 @@ if (y_var == "avg_winding_temp") {
 
 ggplot(data %>% filter(month(data[[time_var]]) == 5),
        aes_string(x = time_var, y = y_var, color = y_var)) +
-  geom_smooth(aes(col = ..y..), size = 1.5) +
+  geom_point(aes(col = ..y..)) +
+  geom_smooth(color = "grey", size = 1.5) +
+  geom_point(aes(x = data[[time_var]][min_idx], y = data[[y_var]][min_idx]), color = "blue", size = 3) +
+geom_point(aes(x = data[[time_var]][max_idx], y = data[[y_var]][max_idx]), color = "red", size = 3) +
   scale_color_gradient2(low = "blue", high = "red", mid = "yellow",
                         midpoint = median(data[[y_var]]),
                         name = legend_title) +
@@ -361,9 +364,9 @@ plot_chelan_loess_may(chelan_df_long,
                 "timestamp_utc",
                 "avg_cooling_water_temp",
                 "unit_num",
-                "Unit C7",
-                "2018-05-15",
-                "2018-05-16")
+                "Unit C2",
+                "2018-05-07",
+                "2018-05-21")
 
 ```
 
@@ -438,7 +441,9 @@ ui <- dashboardPage(
   dateRangeInput("dates", 
                  "Date Range",
                  start = "2018-01-01", 
-                 end = "2018-12-31")
+                 end = "2018-12-31",
+                 min = "2018-05-01",
+                 max = "2018-05-31")
   ),
   dashboardBody(
     # Boxes need to be put in a row (or column)
@@ -457,7 +462,13 @@ server <- function(input, output) {
   histdata <- rnorm(500)
 
   output$plot1 <- renderPlot({
-    plot_chelan_loess(chelan_df_long, "timestamp_utc", input$Variable)
+    plot_chelan_loess_may(chelan_df_long,
+                          "timestamp_utc",
+                          input$Variable,
+                          "unit_num",
+                          input$Unit,
+                          input$dates[1],
+                          input$dates[2])
   })
   
   output$table1 <- renderTable({
