@@ -45,8 +45,16 @@ chelan_df_long[is.na(chelan_df_long)] <- 0
 chelan_df_long <- chelan_df_long %>%
   mutate(unit_status = ifelse(total_current > 10, "On", "Off")) %>%
   mutate(timestamp_utc = as.POSIXct(timestamp_utc)) %>%
-  mutate(unit_num = as.factor(unit_num))
-
+  mutate(unit_num = as.factor(unit_num),
+         seasons = ifelse(timestamp_utc < "2018-03-20",
+                         "Winter",
+                         ifelse(timestamp_utc < "2018-06-21",
+                                "Spring",
+                                ifelse(timestamp_utc < "2018-09-22",
+                                       "Summer",
+                                       ifelse(timestamp_utc < "2018-12-21",
+                                              "Autumn", "Winter")))),
+         seasons = as.factor(seasons))
 ```
 
 ```{r Q2}
@@ -79,6 +87,18 @@ chelan_df_long %>% group_by(unit_num) %>%
 chelan_df_long %>% filter(unit_status == "Off") %>%
   group_by(hour = hour(timestamp_utc)) %>%
   summarise(offline_hours_totals = length(unit_status)) 
+
+chelan_df_long %>% filter(unit_status == "Off",
+                          hour(timestamp_utc) == 10) %>% 
+  group_by(unit_num) %>% 
+  summarise(offline_hour10_totals = length(unit_status))
+
+summary(lm(avg_winding_temp ~ seasons + unit_num, data = chelan_df_long))
+summary(lm(total_current ~ seasons + unit_num, data = chelan_df_long))
+summary(lm(avg_cooling_water_flow_gal ~ seasons + unit_num, data = chelan_df_long))
+summary(lm(avg_cooling_water_temp ~ seasons + unit_num, data = chelan_df_long))
+summary(lm(avg_cooling_air_out_temp ~ seasons + unit_num, data = chelan_df_long))
+
 
 ```
 
