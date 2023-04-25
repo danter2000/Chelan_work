@@ -440,8 +440,8 @@ ui <- dashboardPage(
               width = "100%"),
   dateRangeInput("dates", 
                  "Date Range",
-                 start = "2018-01-01", 
-                 end = "2018-12-31",
+                 start = "2018-05-01", 
+                 end = "2018-05-31",
                  min = "2018-05-01",
                  max = "2018-05-31")
   ),
@@ -472,8 +472,13 @@ server <- function(input, output) {
   })
   
   output$table1 <- renderTable({
-    data <- histdata[seq_len(input$slider)]
-    tibble(data)
+    sum_table(chelan_df_long,
+              "timestamp_utc",
+              input$Variable,
+              "unit_num",
+              input$Unit,
+              input$dates[1],
+              input$dates[2])
   })
 }
 
