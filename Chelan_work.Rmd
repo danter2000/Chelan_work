@@ -417,8 +417,6 @@ library(tidyverse)
 ui <- dashboardPage(
   dashboardHeader(title = "Unit Diagnostics"),
   dashboardSidebar(
-    sliderInput("slider", "Slider input:", 1, 100, 50)
-  ,
     selectInput("Unit", 
               label = "Unit", 
               choices = c("All Units", 
@@ -462,23 +460,43 @@ server <- function(input, output) {
   histdata <- rnorm(500)
 
   output$plot1 <- renderPlot({
-    plot_chelan_loess_may(chelan_df_long,
-                          "timestamp_utc",
-                          input$Variable,
-                          "unit_num",
-                          input$Unit,
-                          input$dates[1],
-                          input$dates[2])
+    if (input$Unit == "All Units") {
+      plot_chelan_loess_may(chelan_df_long,
+                            "timestamp_utc",
+                            input$Variable,
+                            NULL,
+                            NULL,
+                            input$dates[1],
+                            input$dates[2])
+    } else {
+      plot_chelan_loess_may(chelan_df_long,
+                            "timestamp_utc",
+                            input$Variable,
+                            "unit_num",
+                            input$Unit,
+                            input$dates[1],
+                            input$dates[2])
+    }
   })
   
   output$table1 <- renderTable({
-    sum_table(chelan_df_long,
-              "timestamp_utc",
-              input$Variable,
-              "unit_num",
-              input$Unit,
-              input$dates[1],
-              input$dates[2])
+    if (input$Unit == "All Units") {
+      sum_table(chelan_df_long,
+                "timestamp_utc",
+                input$Variable,
+                NULL,
+                NULL,
+                input$dates[1],
+                input$dates[2])
+    } else {
+      sum_table(chelan_df_long,
+                "timestamp_utc",
+                input$Variable,
+                "unit_num",
+                input$Unit,
+                input$dates[1],
+                input$dates[2])
+    }
   })
 }
 
