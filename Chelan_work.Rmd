@@ -347,12 +347,13 @@ ggplot(data %>% filter(month(data[[time_var]]) == 5),
   scale_color_gradient2(low = "blue", high = "red", mid = "yellow",
                         midpoint = median(data[[y_var]]),
                         name = legend_title) +
-  theme_classic() +
-           theme(axis.title.x = element_blank()) +
+  theme_minimal() +
+           theme(axis.text.x = element_text(angle = 45, vjust = 0.5, hjust = .5),
+                 axis.title.x = element_blank()) +
            labs(y = y_axis_title, title = plot_title) +
-           scale_x_datetime(date_labels = "%d",
+           scale_x_datetime(date_labels = "%b %d",
                             breaks = date_breaks("2 days"),
-                            labels = format(as.POSIXct(data[[time_var]]), "%d"))
+                            labels = format(as.POSIXct(data[[time_var]]), "%b %d"))
   
 }
 
@@ -361,8 +362,55 @@ plot_chelan_loess_may(chelan_df_long,
                 "avg_cooling_water_temp",
                 "unit_num",
                 "Unit C7",
-                "2018-05-02",
-                "2018-05-14")
+                "2018-05-01",
+                "2018-05-30")
+
+```
+
+```{r Q9 table}
+
+sum_table <- function(data,
+                      time_var,
+                      y_var,
+                      subset_var = NULL,
+                      subset_level = NULL,
+                      start_date = NULL,
+                      end_date = NULL) {
+
+  
+if (!is.null(start_date) & !is.null(end_date)) {
+    data <- data %>% filter(date >= start_date & date <= end_date)
+  }
+  
+  # Filter data based on unit levels if unit_levels are specified
+  if (!is.null(unit_levels)) {
+    data <- data %>% filter(unit %in% unit_levels)
+  }
+  
+  # Calculate summary statistics
+  summary_stats <- data %>%
+    group_by(unit, .data[[group_var]]) %>%
+    summarise(mean = mean(.data[[y_var]], na.rm = TRUE),
+              median = median(.data[[y_var]], na.rm = TRUE),
+              min = min(.data[[y_var]], na.rm = TRUE),
+              max = max(.data[[y_var]], na.rm = TRUE),
+              n = n()) %>%
+    ungroup() %>%
+    arrange(unit, .data[[group_var]])
+  
+  # Format summary statistics table using kable
+  kable(summary_stats, caption = "Summary Statistics", format = "html") %>%
+    kable_styling(bootstrap_options = "striped")
+      
+}
+
+sum_table(chelan_df_long,
+                "timestamp_utc",
+                "avg_cooling_water_temp",
+                "unit_num",
+                "Unit C7",
+                "2018-05-01",
+                "2018-05-30")
 
 ```
 
