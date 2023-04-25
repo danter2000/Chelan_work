@@ -87,7 +87,9 @@ plot_chelan_raw <- function(data,
                             time_var,
                             y_var,
                             subset_var = NULL,
-                            subset_level = NULL) {
+                            subset_level = NULL,
+                            start_date = NULL,
+                            end_date = NULL) {
   
 plot_title <- ""
   
@@ -97,6 +99,11 @@ if (!is.null(subset_level)) {
 
 if (!is.null(subset_var) && !is.null(subset_level)) {
     data <- data %>% filter(!!as.name(subset_var) == subset_level)
+}
+
+if (!is.null(start_date) && !is.null(end_date)) {
+    data <- data %>% 
+    filter(as.Date(data[[time_var]]) >= as.Date(start_date) & as.Date(data[[time_var]]) <= as.Date(end_date))
   }
 
 min_idx <- which.min(data[[y_var]])
@@ -151,9 +158,32 @@ ggplot(data, aes_string(x = time_var, y = y_var, color = y_var)) +
 plot_chelan_raw(chelan_df_long,
                 "timestamp_utc",
                 "avg_cooling_water_temp",
-                "unit_num")
+                "unit_num",
+                start_date = "2018-05-01",
+                end_date = "2018-05-20")
 
-plot_chelan_loess <- function(data, time_var, y_var) {
+plot_chelan_loess <- function(data,
+                            time_var,
+                            y_var,
+                            subset_var = NULL,
+                            subset_level = NULL,
+                            start_date = NULL,
+                            end_date = NULL) {
+  
+plot_title <- ""
+  
+if (!is.null(subset_level)) {
+    plot_title <- paste0(plot_title, "", subset_level)
+  }
+
+if (!is.null(subset_var) && !is.null(subset_level)) {
+    data <- data %>% filter(!!as.name(subset_var) == subset_level)
+}
+
+if (!is.null(start_date) && !is.null(end_date)) {
+    data <- data %>% 
+    filter(as.Date(data[[time_var]]) >= as.Date(start_date) & as.Date(data[[time_var]]) <= as.Date(end_date))
+  }
 
 min_idx <- which.min(data[[y_var]])
 max_idx <- which.max(data[[y_var]])
@@ -176,7 +206,7 @@ if (y_var == "avg_winding_temp") {
   }
 
 ggplot(data, aes_string(x = time_var, y = y_var, color = y_var)) +
-  geom_smooth(aes(col = ..y..)) +
+  geom_smooth(aes(col = ..y..), size = 1.5) +
   scale_color_gradient2(low = "blue", high = "red", mid = "yellow",
                         midpoint = median(data[[y_var]]),
                         name = legend_title) +
@@ -196,15 +226,18 @@ ggplot(data, aes_string(x = time_var, y = y_var, color = y_var)) +
            colour = "grey",
            size = 4) +
            theme(axis.title.x = element_blank()) +
-           labs(y = y_axis_title) +
+           labs(y = y_axis_title, title = plot_title) +
            scale_x_datetime(date_labels = "%b",
                             breaks = scales::date_breaks("1 month"),
                             labels = format(as.POSIXct(data[[time_var]]), "%b"))
   
 }
 
-plot_chelan_loess(chelan_df_long, "timestamp_utc", "total_current")
-
+plot_chelan_loess(chelan_df_long,
+                "timestamp_utc",
+                "avg_cooling_water_temp",
+                "unit_num",
+                "Unit C5")
 ```
 
 ```{r Q8}
@@ -233,12 +266,8 @@ if (y_var == "avg_winding_temp") {
 
 ggiraph(code = print(ggplot(data, aes_string(x = time_var, y = y_var,
                         color = data$unit_num, group = data$unit_num)) +
-  geom_smooth_interactive(aes(col = ..y..,
-                              tooltip = paste0("", data$unit_num)),
+  geom_smooth_interactive(aes(tooltip = paste0("", data$unit_num)),
                           size = 1.5) +
-  scale_color_gradient2(low = "blue", high = "red", mid = "yellow",
-                        midpoint = median(data[[y_var]]),
-                        name = legend_title) +
   theme_classic() +
   geom_vline(xintercept = c(as.POSIXct("2018-03-20"),
                             as.POSIXct("2018-06-21"),
@@ -263,6 +292,72 @@ ggiraph(code = print(ggplot(data, aes_string(x = time_var, y = y_var,
 }
 
 plot_chelan_loess_group(chelan_df_long, "timestamp_utc", "total_current")
+
+```
+
+```{r Q9 May}
+
+plot_chelan_loess_may <- function(data,
+                                  time_var,
+                                  y_var,
+                                  subset_var = NULL,
+                                  subset_level = NULL,
+                                  start_date = NULL,
+                                  end_date = NULL) {
+  
+plot_title <- ""
+  
+if (!is.null(subset_level)) {
+    plot_title <- paste0(plot_title, "", subset_level)
+  }
+
+if (!is.null(subset_var) && !is.null(subset_level)) {
+    data <- data %>% filter(!!as.name(subset_var) == subset_level)
+}
+
+if (!is.null(start_date) && !is.null(end_date)) {
+    data <- data %>% 
+    filter(as.Date(data[[time_var]]) >= as.Date(start_date) & as.Date(data[[time_var]]) <= as.Date(end_date))
+  }
+
+min_idx <- which.min(data[[y_var]])
+max_idx <- which.max(data[[y_var]])
+
+if (y_var == "avg_winding_temp") {
+    y_axis_title <- "Average Stator Winding Temperature (°C)"
+    legend_title <- "(°C)"
+  } else if (y_var == "total_current") {
+    y_axis_title <- "Total Current (A)"
+    legend_title <- "(A)"
+  } else if (y_var == "avg_cooling_water_flow_gal") {
+    y_axis_title <- "Average Cooling Water Flow (gal/min)"
+    legend_title <- "(gal/min)"
+  } else if (y_var == "avg_cooling_water_temp") {
+    y_axis_title <- "Average Cooling Water Temperature (°C)"
+    legend_title <- "(°C)"
+  } else if (y_var == "avg_cooling_air_out_temp") {
+    y_axis_title <- "Average Cooling Air Out Temperature (°C)"
+    legend_title <- "(°C)"
+  }
+
+ggplot(data %>% filter(month(data[[time_var]]) == 5),
+       aes_string(x = time_var, y = y_var, color = y_var)) +
+  geom_smooth(aes(col = ..y..), size = 1.5) +
+  scale_color_gradient2(low = "blue", high = "red", mid = "yellow",
+                        midpoint = median(data[[y_var]]),
+                        name = legend_title) +
+  theme_classic() +
+           theme(axis.title.x = element_blank()) +
+           labs(y = y_axis_title, title = plot_title) +
+           scale_x_datetime(date_labels = "%d",
+                            breaks = date_breaks("1 day"),
+                            labels = format(as.POSIXct(data[[time_var]]), "%d"))
+  
+}
+
+plot_chelan_loess_may(chelan_df_long,
+                "timestamp_utc",
+                "avg_cooling_water_temp")
 
 ```
 
