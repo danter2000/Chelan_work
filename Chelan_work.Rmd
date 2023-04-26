@@ -42,6 +42,16 @@ chelan_df_long$unit_num <- paste("Unit C", chelan_df_long$unit_num, sep = "")
 colSums(is.na(chelan_df_long))
 sum(is.na(chelan_df_long))
 
+chelan_df_long %>%
+  group_by(unit_num) %>%
+  summarize(group_nas = sum(is.na(c(avg_winding_temp,
+                                    total_current,
+                                    avg_cooling_water_flow_gal,
+                                    avg_cooling_water_temp,
+                                    avg_cooling_air_out_temp
+                                  ))))
+
+
 chelan_df_long[is.na(chelan_df_long)] <- 0
 
 chelan_df_long <- chelan_df_long %>%
@@ -56,7 +66,8 @@ chelan_df_long <- chelan_df_long %>%
                                        "Summer",
                                        ifelse(timestamp_utc < "2018-12-21",
                                               "Autumn", "Winter")))),
-         seasons = as.factor(seasons))
+         seasons = as.factor(seasons)) %>%
+  mutate(Overheated = ifelse(avg_cooling_air_out_temp > 27, 1, 0))
 ```
 
 ```{r Q2}
