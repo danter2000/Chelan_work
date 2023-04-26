@@ -83,7 +83,7 @@ chelan_df_long %>% filter(unit_num == "Unit C6",
 chelan_df_long %>% filter(unit_num == "Unit C6") %>% 
   group_by(month = lubridate::floor_date(timestamp_utc, 'month')) %>%
   summarise(monthly_offline_hrs = sum(unit_status == "Off"),
-            monthly_offline_prop = round(sum(unit_status == "Off") / length(unit_status),
+            monthly_offline_prop = 100 * round(sum(unit_status == "Off") / length(unit_status),
                                          3))
 
 ```
@@ -97,20 +97,37 @@ chelan_df_long %>% group_by(unit_num) %>%
 chelan_df_long %>% group_by(unit_num) %>%
   summarize(hours_too_hot = sum(avg_cooling_air_out_temp > 27),
             total_hours = length(unit_num),
-            prop_too_hot = hours_too_hot / total_hours)
+            prop_too_hot = 100 * (hours_too_hot / total_hours))
 
 ```
 
 ```{r Q6}
 
-chelan_df_long %>% filter(unit_status == "Off") %>%
+bubble_df <- chelan_df_long %>% filter(unit_status == "Off") %>%
   group_by(hour = hour(timestamp_utc)) %>%
-  summarise(offline_hours_totals = length(unit_status)) 
+  summarise(offline_hours_totals = length(unit_status)) %>%
+  mutate(daytime = ifelse(hour >= daytime_hours[1] & hour < daytime_hours[2],
+                          "daytime", "nighttime"))
 
 chelan_df_long %>% filter(unit_status == "Off",
                           hour(timestamp_utc) == 10) %>% 
   group_by(unit_num) %>% 
   summarise(offline_hour10_totals = length(unit_status))
+
+daytime_color <- "orange"
+nighttime_color <- "blue"
+
+ggplot(bubble_df, aes(x = hour,
+                      y = offline_hours_totals,
+                      size = offline_hours_totals,
+                      fill = daytime)) +
+  geom_point(shape = 21) +
+  scale_size(range = c(2, 10)) +
+  scale_x_continuous(breaks = 0:24, limits = c(0, 24),
+                     name = "Offline Hours") + 
+  scale_fill_manual(values = c(daytime_color, nighttime_color)) +
+  theme_minimal() +
+  labs(size = "Offline Hours Totals", x = "Hour", y = "") 
 
 summary(lm(avg_winding_temp ~ seasons + unit_num, data = chelan_df_long))
 summary(lm(total_current ~ seasons + unit_num, data = chelan_df_long))
