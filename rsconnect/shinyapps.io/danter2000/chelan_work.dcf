@@ -5,9 +5,9 @@ account: danter2000
 server: shinyapps.io
 hostUrl: https://api.shinyapps.io/v1
 appId: 8950583
-bundleId: 7134823
+bundleId: 7134851
 url: https://danter2000.shinyapps.io/chelan_work/
-when: 1682450147.74087
-lastSyncTime: 1682450147.74089
+when: 1682450642.6078
+lastSyncTime: 1682450642.60782
 asMultiple: FALSE
 asStatic: FALSE

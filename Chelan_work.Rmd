@@ -100,6 +100,9 @@ summary(lm(avg_cooling_water_flow_gal ~ seasons + unit_num, data = chelan_df_lon
 summary(lm(avg_cooling_water_temp ~ seasons + unit_num, data = chelan_df_long))
 summary(lm(avg_cooling_air_out_temp ~ seasons + unit_num, data = chelan_df_long))
 
+summary(lm(avg_winding_temp ~ total_current + avg_cooling_water_flow_gal + avg_cooling_water_temp + avg_cooling_air_out_temp + seasons + unit_num,
+        data = chelan_df_long))
+
 
 ```
 
@@ -243,15 +246,16 @@ ggplot(data, aes_string(x = time_var, y = y_var, color = y_var)) +
                          as.POSIXct("2018-05-05"),
                          as.POSIXct("2018-08-05"),
                          as.POSIXct("2018-11-05")),
-           y = max(data[[y_var]]) * 1.05,
+           y = max(summary(lm(y_var ~ time_var, data = data))$fitted.values),
            label = c("Winter", "Spring", "Summer", "Autumn"),
            colour = "grey",
            size = 4) +
-           theme(axis.title.x = element_blank()) +
-           labs(y = y_axis_title, title = plot_title) +
-           scale_x_datetime(date_labels = "%b",
-                            breaks = scales::date_breaks("1 month"),
-                            labels = format(as.POSIXct(data[[time_var]]), "%b"))
+  theme(axis.title.x = element_blank()) +
+  labs(y = y_axis_title, title = plot_title) +
+  scale_x_datetime(date_labels = "%b",
+                   breaks = scales::date_breaks("1 month"),
+                   labels = format(as.POSIXct(data[[time_var]]), "%b")) +
+  geom_hline(yintercept = ifelse(y_var == "avg_cooling_air_out_temp", 27, NA_real_))
   
 }
 
@@ -259,7 +263,7 @@ plot_chelan_loess(chelan_df_long,
                 "timestamp_utc",
                 "avg_cooling_water_temp",
                 "unit_num",
-                "Unit C5")
+                "Unit C4")
 ```
 
 ```{r Q8}
@@ -522,5 +526,14 @@ server <- function(input, output) {
 }
 
 shinyApp(ui, server)
+
+```
+
+
+```{r}
+
+ggplot(data = chelan_df_long, mapping = aes(x = timestamp_utc, y = avg_winding_temp)) +
+  geom_point() +
+  geom_vline()
 
 ```
