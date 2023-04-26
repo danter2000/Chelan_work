@@ -82,6 +82,12 @@ chelan_df_long %>% filter(unit_num == "Unit C6") %>%
 chelan_df_long %>% group_by(unit_num) %>%
   summarise(online_hrs = sum(unit_status == "On"))
 
+# How many hours were under the target temp of 27 degrees
+chelan_df_long %>% group_by(unit_num) %>%
+  summarize(hours_too_hot = sum(avg_cooling_air_out_temp > 27),
+            total_hours = length(unit_num),
+            prop_too_hot = hours_too_hot / total_hours)
+
 ```
 
 ```{r Q6}
@@ -426,25 +432,33 @@ if (!is.null(subset_var) && !is.null(subset_level)) {
 if (!is.null(start_date) && !is.null(end_date)) {
     data <- data %>% 
     filter(as.Date(data[[time_var]]) >= as.Date(start_date) & as.Date(data[[time_var]]) <= as.Date(end_date))
+}
+  
+  if (y_var == "avg_cooling_air_out_temp") {
+    data %>%
+      select(!!sym(time_var), !!sym(y_var)) %>%
+      summarize(Min = round(min(!!sym(y_var)), 2),
+                Max = round(max(!!sym(y_var)), 2),
+                Median = round(median(!!sym(y_var)), 2),
+                N = nrow(data),
+                `Proportion too Hot` = round(mean(!!sym(y_var) > 27), 4))
+  } else {
+    data %>%
+      select(!!sym(time_var), !!sym(y_var)) %>%
+      summarize(Min = round(min(!!sym(y_var)), 2),
+                Max = round(max(!!sym(y_var)), 2),
+                Median = round(median(!!sym(y_var)), 2),
+                N = nrow(data))
+      
   }
   
-  # Calculate summary statistics
-  data %>%
-    select(!!sym(time_var), !!sym(y_var)) %>%
-    summarize(Min = round(min(!!sym(y_var)), 2),
-              Max = round(max(!!sym(y_var)), 2),
-              Median = round(median(!!sym(y_var)), 2),
-              N = nrow(data))
-      
 }
 
 sum_table(chelan_df_long,
                 "timestamp_utc",
-                "avg_cooling_water_temp",
-                "unit_num",
-                "Unit C7",
-                "2018-05-15",
-                "2018-05-30")
+                "avg_cooling_air_out_temp",
+                start_date = "2018-05-01",
+                end_date = "2018-05-30")
 
 ```
 

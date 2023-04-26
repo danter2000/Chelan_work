@@ -133,13 +133,24 @@ sum_table <- function(data,
       filter(as.Date(data[[time_var]]) >= as.Date(start_date) & as.Date(data[[time_var]]) <= as.Date(end_date))
   }
   
-  # Calculate summary statistics
-  data %>%
-    select(!!sym(time_var), !!sym(y_var)) %>%
-    summarize(Min = round(min(!!sym(y_var)), 2),
-              Max = round(max(!!sym(y_var)), 2),
-              Median = round(median(!!sym(y_var)), 2),
-              N = nrow(data))
+  if (y_var == "avg_cooling_air_out_temp") {
+    data %>%
+      select(!!sym(time_var), !!sym(y_var)) %>%
+      summarize(Min = round(min(!!sym(y_var)), 2),
+                Max = round(max(!!sym(y_var)), 2),
+                Median = round(median(!!sym(y_var)), 2),
+                N = nrow(data),
+                `Proportion too Hot` = round(mean(!!sym(y_var) > 27), 4))
+  } else {
+    data %>%
+      select(!!sym(time_var), !!sym(y_var)) %>%
+      summarize(Min = round(min(!!sym(y_var)), 2),
+                Max = round(max(!!sym(y_var)), 2),
+                Median = round(median(!!sym(y_var)), 2),
+                N = nrow(data))
+    
+  }
+  
   
 }
 
