@@ -1,0 +1,13 @@
+name: Chelan_Shiny
+title: Chelan_Shiny
+username:
+account: danter2000
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 8954687
+bundleId: 7136360
+url: https://danter2000.shinyapps.io/Chelan_Shiny/
+when: 1682479214.02656
+lastSyncTime: 1682479214.02658
+asMultiple: FALSE
+asStatic: FALSE

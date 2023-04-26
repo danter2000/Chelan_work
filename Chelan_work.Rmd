@@ -12,6 +12,7 @@ library(tidyverse)
 library(janitor)
 library(data.table)
 library(scales)
+library(stats)
 
 # For Animations
 library(ggiraph)
@@ -176,16 +177,21 @@ ggplot(data, aes_string(x = time_var, y = y_var, color = y_var)) +
            labs(y = y_axis_title, title = plot_title) +
            scale_x_datetime(date_labels = "%b",
                             breaks = scales::date_breaks("1 month"),
-                            labels = format(as.POSIXct(data[[time_var]]), "%b"))
+                            labels = format(as.POSIXct(data[[time_var]]), "%b")) + 
+  geom_hline(yintercept = ifelse(y_var == "avg_cooling_air_out_temp",
+                                 27,
+                                 NA_real_),
+             linetype = "dashed",
+             alpha = 1,
+             colour = "green")
   
 }
 
 plot_chelan_raw(chelan_df_long,
                 "timestamp_utc",
-                "avg_cooling_water_temp",
+                "avg_cooling_air_out_temp",
                 "unit_num",
-                start_date = "2018-05-01",
-                end_date = "2018-05-20")
+                )
 
 plot_chelan_loess <- function(data,
                             time_var,
@@ -246,7 +252,7 @@ ggplot(data, aes_string(x = time_var, y = y_var, color = y_var)) +
                          as.POSIXct("2018-05-05"),
                          as.POSIXct("2018-08-05"),
                          as.POSIXct("2018-11-05")),
-           y = max(summary(lm(y_var ~ time_var, data = data))$fitted.values),
+           y =  max(data[[y_var]]) * 1.05,
            label = c("Winter", "Spring", "Summer", "Autumn"),
            colour = "grey",
            size = 4) +
@@ -255,15 +261,18 @@ ggplot(data, aes_string(x = time_var, y = y_var, color = y_var)) +
   scale_x_datetime(date_labels = "%b",
                    breaks = scales::date_breaks("1 month"),
                    labels = format(as.POSIXct(data[[time_var]]), "%b")) +
-  geom_hline(yintercept = ifelse(y_var == "avg_cooling_air_out_temp", 27, NA_real_))
+  geom_hline(yintercept = ifelse(y_var == "avg_cooling_air_out_temp",
+                                 27,
+                                 NA_real_),
+             linetype = "dashed",
+             alpha = 1,
+             colour = "green")
   
 }
 
 plot_chelan_loess(chelan_df_long,
                 "timestamp_utc",
-                "avg_cooling_water_temp",
-                "unit_num",
-                "Unit C4")
+                "avg_cooling_air_out_temp")
 ```
 
 ```{r Q8}
@@ -381,17 +390,21 @@ geom_point(aes(x = data[[time_var]][max_idx], y = data[[y_var]][max_idx]), color
            labs(y = y_axis_title, title = plot_title) +
            scale_x_datetime(date_labels = "%b %d",
                             breaks = date_breaks("2 days"),
-                            labels = format(as.POSIXct(data[[time_var]]), "%b %d"))
+                            labels = format(as.POSIXct(data[[time_var]]), "%b %d")) +
+  geom_hline(yintercept = ifelse(y_var == "avg_cooling_air_out_temp",
+                                 27,
+                                 NA_real_),
+             linetype = "dashed",
+             alpha = 1,
+             colour = "green")
   
 }
 
 plot_chelan_loess_may(chelan_df_long,
                 "timestamp_utc",
-                "avg_cooling_water_temp",
-                "unit_num",
-                "Unit C2",
-                "2018-05-07",
-                "2018-05-21")
+                "avg_cooling_air_out_temp",
+                start_date = "2018-05-01",
+                end_date = "2018-05-31")
 
 ```
 
@@ -418,10 +431,10 @@ if (!is.null(start_date) && !is.null(end_date)) {
   # Calculate summary statistics
   data %>%
     select(!!sym(time_var), !!sym(y_var)) %>%
-    summarize(Sum= sum(!!sym(y_var)),
-              Min = round(min(!!sym(y_var)), 2),
+    summarize(Min = round(min(!!sym(y_var)), 2),
               Max = round(max(!!sym(y_var)), 2),
-              Median = round(median(!!sym(y_var)), 2))
+              Median = round(median(!!sym(y_var)), 2),
+              N = nrow(data))
       
 }
 
@@ -430,7 +443,7 @@ sum_table(chelan_df_long,
                 "avg_cooling_water_temp",
                 "unit_num",
                 "Unit C7",
-                "2018-05-01",
+                "2018-05-15",
                 "2018-05-30")
 
 ```
@@ -471,7 +484,7 @@ ui <- dashboardPage(
   dashboardBody(
     # Boxes need to be put in a row (or column)
     fluidRow(
-      box(plotOutput("plot1", height = 400, width = 500)
+      box(plotOutput("plot1", height = 400, width = 400)
       )),
       fluidRow(
       box(tableOutput("table1")
@@ -481,8 +494,6 @@ ui <- dashboardPage(
 )
 
 server <- function(input, output) {
-  set.seed(122)
-  histdata <- rnorm(500)
 
   output$plot1 <- renderPlot({
     if (input$Unit == "All Units") {
@@ -526,14 +537,5 @@ server <- function(input, output) {
 }
 
 shinyApp(ui, server)
-
-```
-
-
-```{r}
-
-ggplot(data = chelan_df_long, mapping = aes(x = timestamp_utc, y = avg_winding_temp)) +
-  geom_point() +
-  geom_vline()
 
 ```
